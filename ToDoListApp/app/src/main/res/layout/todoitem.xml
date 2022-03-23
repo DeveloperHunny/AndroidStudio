@@ -29,7 +29,6 @@
             android:id="@+id/contentView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:text="content"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -42,6 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:text="Modify"
+            android:onClick="OnClick_ModifyBtn"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
