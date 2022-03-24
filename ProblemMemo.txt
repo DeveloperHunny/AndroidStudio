@@ -1,0 +1,9 @@
+초기화 안 하고 변수 사용 - Null 오류
+
+ListView adapter 안에 item 설정
+
+requestCode, resultCode 헷갈려서 3일 날림
+
+friend 관리 및 chat 관리 어려움
+
+어떻게 채팅 내용을 저장할 것인가?

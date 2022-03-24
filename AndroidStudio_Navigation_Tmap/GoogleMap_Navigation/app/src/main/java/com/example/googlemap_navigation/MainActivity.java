@@ -6,14 +6,21 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
+import android.icu.text.IDNA;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -47,8 +54,9 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.LogManager;
-
+import static android.speech.tts.TextToSpeech.ERROR;
 public class MainActivity extends AppCompatActivity {
 
     //지도 변수 선언
@@ -98,6 +106,12 @@ public class MainActivity extends AppCompatActivity {
     TMapGpsManager tMapGpsManager;
     TMapPoint curPosition;
 
+    //음성 인식버튼
+    Button voiceRecognize_Btn;
+
+    //음성 말하기
+    private TextToSpeech tts;
+
 
 
     @Override
@@ -113,7 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
         //검색창 변수 설정
         inputStart_editText = (EditText) findViewById(R.id.inputStart_editText);
+
         inputEnd_editText = (EditText) findViewById(R.id.inputEnd_editText);
+
         searchResult_listView = (ListView)findViewById(R.id.searchResultList);
         list_data = new ArrayList<String>();
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list_data);
@@ -153,6 +169,9 @@ public class MainActivity extends AppCompatActivity {
         tMapGpsManager.setMinTime(1000);
         tMapGpsManager.setMinDistance(5);
         tMapGpsManager.setProvider(tMapGpsManager.NETWORK_PROVIDER);
+
+        //음성인식 버튼
+        voiceRecognize_Btn = (Button) findViewById(R.id.voiceRecognize_Btn);
 
 
         //----------------------------------------------------------//
@@ -547,7 +566,50 @@ public class MainActivity extends AppCompatActivity {
                 builder.setTitle("출발 : " + startMarker.getName() + "\n" + "도착 : " + endMarker.getName());
                 builder.setMessage(message_simple + message_detail);
 
-                AlertDialog alertDialog = builder.create();
+                //builder button setting
+                builder.setPositiveButton("듣기",null);
+                builder.setNegativeButton("닫기",null);
+
+                final AlertDialog alertDialog = builder.create();
+                final  String readText = message_detail;
+
+                alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialogInterface) {
+                        Button listenBtn = ((AlertDialog) alertDialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                        Button cancleBtn = ((AlertDialog) alertDialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+
+                        cancleBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                alertDialog.dismiss();
+                            }
+                        });
+
+                        listenBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //TTS
+
+                                 tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+                                    @Override
+                                    public void onInit(int status) {
+                                        if (status != ERROR){
+                                            int result = tts.setLanguage(Locale.KOREA); // 언어 선택
+                                            if(result == TextToSpeech.LANG_NOT_SUPPORTED || result == TextToSpeech.LANG_MISSING_DATA){
+                                                Log.e("TTS", "This Language is not supported");
+                                            }else{
+                                                tts.speak(readText, TextToSpeech.QUEUE_FLUSH, null, null);
+                                            }
+                                        }else{
+                                            Log.e("TTS", "Initialization Failed!");
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
 
                 alertDialog.show();
             }
@@ -599,9 +661,88 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Recognition Listener 설정
+        final RecognitionListener listener = new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle bundle) {
+                Toast.makeText(getApplicationContext(),"음성인식을 시작합니다.",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+
+            }
+
+            @Override
+            public void onRmsChanged(float v) {
+
+            }
+
+            @Override
+            public void onBufferReceived(byte[] bytes) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+
+            }
+
+            @Override
+            public void onError(int i) {
+
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+            //말을 하면 ArrayList에 단어를 넣고 textView에 단어를 이어줍니다.
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                Log.d("test", inputStart_editText.getText().toString());
+                if(inputStart_editText.getText().toString().equals("")){ //start 입력이 비어있을 경우
+                    for(int i = 0; i < matches.size() ; i++){
+                        inputStart_editText.setText(matches.get(i)); }
+                }
+                else{ //end 입력이 비어있을 경우
+                    for(int i = 0; i < matches.size() ; i++) {
+                        inputEnd_editText.setText(matches.get(i));
+                    }
+                }
+
+            }
 
 
 
+
+            @Override
+            public void onPartialResults(Bundle bundle) {
+
+            }
+
+            @Override
+            public void onEvent(int i, Bundle bundle) {
+
+            }
+        };
+
+        //voice recognize onClick Setting
+        voiceRecognize_Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Permission Check
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET,
+                        Manifest.permission.RECORD_AUDIO},1);
+
+                //Recognizer Intent 생성
+                Intent intent=new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getPackageName());
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,"ko-KR");
+
+                SpeechRecognizer mRecognizer = SpeechRecognizer.createSpeechRecognizer(MainActivity.this);
+                mRecognizer.setRecognitionListener(listener);
+                mRecognizer.startListening(intent);
+
+            }
+        });
 
    }
 

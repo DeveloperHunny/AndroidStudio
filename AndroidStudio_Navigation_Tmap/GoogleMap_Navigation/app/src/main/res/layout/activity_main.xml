@@ -165,6 +165,14 @@
             android:text= "현위치 표시"
             android:layout_gravity="bottom" />
 
+        <!-- 음성 인식 버튼 -->
+        <Button
+            android:id="@+id/voiceRecognize_Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text= "음성 인식"
+            android:layout_gravity="bottom|center" />
+
         <!-- 경로 안내 자세한 정보 출력 버튼 -->
         <Button
             android:id="@+id/showDetailInfo_Path"
