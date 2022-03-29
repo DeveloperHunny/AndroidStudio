@@ -78,7 +78,6 @@ public class FirstLoginActivity extends AppCompatActivity {
                     //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imgUri);
 
                     Glide.with(this).load(imgUri).into(user_profile);
-                    //glide는 추가 퍼미션이 필요하고 이를 위해 동적 퍼미션이 필요해서 귀찮으므로 Picasso 이용
                 }
                 else{
                     Log.e("test", "here2");

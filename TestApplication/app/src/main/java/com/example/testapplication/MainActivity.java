@@ -21,16 +21,49 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
     private TextView textView;
+    private Button clickBtn;
+    private Button finishBtn;
+
+
+    private static int number;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         textView = (TextView) findViewById(R.id.textView);
+        clickBtn = (Button) findViewById(R.id.clickBtn);
+        finishBtn = (Button) findViewById(R.id.finishBtn);
+        number = 1;
 
-        Observable<String> observable = Observable.create(emitter -> {
-            emitter.onNext(Thread.currentThread().getName() + "\n: RxJava Observer Test");
-            emitter.onComplete();
+        String[] source = {"First", "Second", "Third"};
+        Observable.fromArray(source)
+                .observeOn(Schedulers.single())
+                .subscribe( data -> {
+                    System.out.println("Observe On : "+Thread.currentThread().getName()+" | "+"value : "+data);
+                });
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Observable<Integer> observable = Observable.create(emitter -> {
+            clickBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("TAG",Thread.currentThread().getName());
+                    emitter.onNext(number);
+                    number += 1;
+                }
+            });
+
+            finishBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    emitter.onComplete();
+                }
+            });
         });
 
         //observable.subscribe(observer); // main쓰레드에서 실행
@@ -41,10 +74,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    DisposableObserver<String> observer = new DisposableObserver<String>() {
+    DisposableObserver<Integer> observer = new DisposableObserver<Integer>() {
         @Override
-        public void onNext(@NonNull String s) {
-            textView.setText(s);
+        public void onNext(@NonNull Integer number) {
+            textView.setText(number.toString());
         }
 
         @Override
