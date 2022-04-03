@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="#FFC107">
+    android:background="@color/primary_orange">
 
     <ListView
         android:id="@+id/listView"
@@ -26,7 +26,11 @@
             android:id="@+id/addBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="추가"/>
+            android:text="ADD"
+            android:textSize="20sp"
+            android:textColor="@color/primary_orange"
+            android:background="@drawable/button_style"
+            android:fontFamily="@font/maplestory_bold"/>
     </FrameLayout>
 
 

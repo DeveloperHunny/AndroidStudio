@@ -16,10 +16,10 @@ class MainActivity : AppCompatActivity() {
         val listView = findViewById<ListView>(R.id.listView)
         val addBtn = findViewById<Button>(R.id.addBtn)
         var todoList = ArrayList<TodoItem>()
-        val TodoAdapter = TodoAdapter(this, todoList)
-        val dialogView = AddDialogClass(this)
+        val todoAdapter = TodoAdapter(this, todoList)
+        val dialogView = AddDialogClass(this,todoList,todoAdapter)
 
-        listView.adapter = TodoAdapter
+        listView.adapter = todoAdapter
 
 
         //AddBtn 클릭 이벤트 설정
