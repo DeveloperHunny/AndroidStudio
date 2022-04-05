@@ -1,6 +1,7 @@
 package com.example.todoapplication
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,9 +37,16 @@ class TodoAdapter (val context: Context, val todoList: ArrayList<TodoItem>) : Ba
         //Inflate View 설정
         titleText.setText(todoItem.title)
 
+        //deleteBtn Click Event설정
         deleteBtn.setOnClickListener {
             todoList.removeAt(position)
             this.notifyDataSetChanged()
+        }
+
+        //item Click Event 설정
+        todoItemView.setOnClickListener {
+            val itemsetDialog = itemsetDialogClass(context,todoList,this,todoItem)
+            itemsetDialog.showDialog()
         }
 
 
