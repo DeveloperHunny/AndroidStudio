@@ -87,7 +87,9 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
             if(!isModify){
                 todoList.add(todoItem)
             }
-            todoAdapter.notifyDataSetChanged()
+
+            //todoList.sortBy{data -> data.complete}
+            todoAdapter.notifyItemInserted(todoList.size-1)
             dialogView.dismiss()
         }
 

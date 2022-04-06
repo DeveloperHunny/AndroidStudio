@@ -7,7 +7,7 @@ class TodoItem {
     var title : String = ""
     var content: String = ""
     var dueTime: Date = Date()
-    var completed: Boolean = false
+    var complete: Boolean = false
 
     constructor(title:String, content:String){
         this.title = title;
