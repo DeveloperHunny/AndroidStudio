@@ -3,10 +3,7 @@ package com.example.todoapplication
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-interface ItemTouchHelperListener{
-    fun onItemMoved(fromIdx : Int, toIdx:Int)
-    fun onItemSwiped(position: Int)
-}
+
 
 class ItemTouchHelperCallback(val listener: ItemTouchHelperListener) : ItemTouchHelper.Callback() {
 
@@ -33,8 +30,7 @@ class ItemTouchHelperCallback(val listener: ItemTouchHelperListener) : ItemTouch
     }
 
     override fun isLongPressDragEnabled(): Boolean {
-        return true
-//        return super.isLongPressDragEnabled()
+        return false //Long Touch Drag 지원 x -> Button으로 처리할거임
     }
 
 }

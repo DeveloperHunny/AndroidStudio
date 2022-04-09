@@ -19,10 +19,12 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
     val dialogView = Dialog(context)
     var isModify = false
     lateinit var todoItem: TodoItem
+    var position: Int = -1
 
-    constructor(context: Context, todoList: ArrayList<TodoItem>, todoAdapter: TodoAdapter, todoItem:TodoItem) : this(context,todoList,todoAdapter) {
+    constructor(context: Context, todoList: ArrayList<TodoItem>, todoAdapter: TodoAdapter,position:Int) : this(context,todoList,todoAdapter) {
         isModify = true
-        this.todoItem = todoItem
+        this.todoItem = todoList.get(position)
+        this.position = position
     }
 
     lateinit var titleEdit : EditText
@@ -84,12 +86,21 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
             todoItem.title = title
             todoItem.content = content
 
-            if(!isModify){
-                todoList.add(todoItem)
-            }
+            if(!isModify){//item 새로 생성
+                var insertIdx:Int = todoList.size;
+                for(idx:Int in todoList.size-1 downTo 0){
+                    if(!todoList.get(idx).complete){
+                        insertIdx = idx+1
+                        break
+                    }
+                }
 
-            //todoList.sortBy{data -> data.complete}
-            todoAdapter.notifyItemInserted(todoList.size-1)
+                todoList.add(insertIdx,todoItem)
+                todoAdapter.notifyItemInserted(insertIdx)
+            }
+            else{//item 정보 수정
+                todoAdapter.notifyItemChanged(position)
+            }
             dialogView.dismiss()
         }
 
