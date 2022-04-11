@@ -60,29 +60,11 @@ class TodoAdapter (private val context: Context, val todoList: ArrayList<TodoIte
             Log.d("TEST1",position.toString())
             InitializeView(todoItem)
 
-//            completeBtn.setOnClickListener {
-//                if(!todoItem.complete){ //not complete -> complete
-//                    todoItem.complete = true
-//
-//
-//                    //List 맨 끝으로 이동
-//                    var toPos = todoList.size -1
-//                    todoItem = todoList.removeAt(position)
-//                    todoList.add(toPos, todoItem)
-//                    itemView.alpha = 0.5f
-//                    Log.d("TEST1",position.toString())
-//                    todoAdapter.notifyItemMoved(position,toPos)
-//                }
-//                else{ //complete -> not complete
-//                    todoItem.complete = false
-//                    itemView.alpha = 1.0f
-//                }
-//            }
         }
 
         fun InitializeView(todoItem:TodoItem){
             titleText.setText(todoItem.title)
-            if(!todoItem.complete){ //not complete item = alpha = 1.0
+            if(todoItem.complete == 0){ //not complete item = alpha = 1.0
                 itemView.alpha = 1.0f
             }
             else{ //complete item - alpha = 0.5

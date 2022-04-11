@@ -2,6 +2,7 @@ package com.example.todoapplication
 
 import android.app.Dialog
 import android.app.TimePickerDialog
+import android.content.ContentValues
 import android.content.Context
 import android.util.Log
 import android.widget.Button
@@ -17,16 +18,12 @@ import kotlin.collections.ArrayList
 
 class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>, val todoAdapter: TodoAdapter){
     val dialogView = Dialog(context)
+    val dbHelper = DbHelperClass(context)
+
     var isModify = false
-    lateinit var todoItem: TodoItem
     var position: Int = -1
 
-    constructor(context: Context, todoList: ArrayList<TodoItem>, todoAdapter: TodoAdapter,position:Int) : this(context,todoList,todoAdapter) {
-        isModify = true
-        this.todoItem = todoList.get(position)
-        this.position = position
-    }
-
+    lateinit var todoItem: TodoItem
     lateinit var titleEdit : EditText
     lateinit var contentEdit : EditText
     lateinit var dueDateText : TextView
@@ -35,19 +32,27 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
     lateinit var  timeBtn : Button
     lateinit var  deleteBtn : Button
 
-    fun dateToString(date: Date): String{
-        var timeText: String = ""
-        if(date.hours >= 12){
-            timeText = SimpleDateFormat("YYYY-MM-dd hh:mm").format(date) + " PM"
-        }
-        else{
-            timeText = SimpleDateFormat("YYYY-MM-dd hh:mm").format(date) + " AM"
-        }
-
-        return timeText
+    constructor(context: Context, todoList: ArrayList<TodoItem>, todoAdapter: TodoAdapter,position:Int) : this(context,todoList,todoAdapter) {
+        isModify = true
+        this.todoItem = todoList.get(position)
+        this.position = position
     }
 
+
+
     fun showDialog(){
+        //객체 초기화 및 view content 설정
+        initializeView(isModify)
+
+        //Button Setting
+        BtnClickEventSetting()
+
+        dialogView.show()
+    }
+
+
+    fun initializeView(isMoify: Boolean){
+        //객체 초기화
         dialogView.setContentView(R.layout.itemset_dialog)
 
         titleEdit = dialogView.findViewById(R.id.titleEdit)
@@ -57,8 +62,6 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
         closeBtn = dialogView.findViewById(R.id.closeBtn)
         timeBtn = dialogView.findViewById(R.id.timeBtn)
         dueDateText = dialogView.findViewById(R.id.dueDateText)
-
-
 
         // 아이템 정보 수정할 때 보이는 View 객체 설정
         if(isModify){
@@ -75,11 +78,15 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
             deleteBtn.isGone = true
             todoItem = TodoItem("None", "None")
         }
+    }
 
+    fun BtnClickEventSetting(){
+        //closeBtn SetOnClickListener
         closeBtn.setOnClickListener {
             dialogView.dismiss()
         }
 
+        //saveBtn SetOnClickListener
         saveBtn.setOnClickListener {
             val title: String = titleEdit.text.toString()
             val content: String = contentEdit.text.toString()
@@ -89,7 +96,7 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
             if(!isModify){//item 새로 생성
                 var insertIdx:Int = todoList.size;
                 for(idx:Int in todoList.size-1 downTo 0){
-                    if(!todoList.get(idx).complete){
+                    if(todoList.get(idx).complete == 0){
                         insertIdx = idx+1
                         break
                     }
@@ -97,6 +104,13 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
 
                 todoList.add(insertIdx,todoItem)
                 todoAdapter.notifyItemInserted(insertIdx)
+
+                //db에 새로운 아이템 추가
+                var DAO = DbAccessObject(context,"todo",todoAdapter)
+                var id = DAO.insertData(todoItem)
+                todoItem.id = id
+
+
             }
             else{//item 정보 수정
                 todoAdapter.notifyItemChanged(position)
@@ -104,6 +118,7 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
             dialogView.dismiss()
         }
 
+        //timeBtn SetOnClickListener
         timeBtn.setOnClickListener {
             var now = System.currentTimeMillis()
             var date = Date(now)
@@ -125,9 +140,18 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
             timePickerDialog.show()
 
         }
-
-        dialogView.show()
     }
 
+    fun dateToString(date: Date): String{
+        var timeText: String = ""
+        if(date.hours >= 12){
+            timeText = SimpleDateFormat("YYYY-MM-dd hh:mm").format(date) + " PM"
+        }
+        else{
+            timeText = SimpleDateFormat("YYYY-MM-dd hh:mm").format(date) + " AM"
+        }
+
+        return timeText
+    }
 
 }
