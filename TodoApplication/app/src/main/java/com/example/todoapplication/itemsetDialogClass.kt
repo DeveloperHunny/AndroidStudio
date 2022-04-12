@@ -18,7 +18,7 @@ import kotlin.collections.ArrayList
 
 class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>, val todoAdapter: TodoAdapter){
     val dialogView = Dialog(context)
-    val dbHelper = DbHelperClass(context)
+
 
     var isModify = false
     var position: Int = -1
@@ -104,11 +104,6 @@ class itemsetDialogClass(val context: Context, val todoList: ArrayList<TodoItem>
 
                 todoList.add(insertIdx,todoItem)
                 todoAdapter.notifyItemInserted(insertIdx)
-
-                //db에 새로운 아이템 추가
-                var DAO = DbAccessObject(context,"todo",todoAdapter)
-                var id = DAO.insertData(todoItem)
-                todoItem.id = id
 
 
             }

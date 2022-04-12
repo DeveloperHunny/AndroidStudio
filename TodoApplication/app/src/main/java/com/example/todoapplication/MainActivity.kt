@@ -26,13 +26,13 @@ class MainActivity : AppCompatActivity(), ItemStartDragListener {
     lateinit var todoList : ArrayList<TodoItem>
     lateinit var recyclerView: RecyclerView
     lateinit var linearLayoutManager: LinearLayoutManager
-
+    lateinit var dbHandler: DBHandler
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //변수 선언 및 초기화
-        val dbHelper = DbHelperClass(this)
+        dbHandler = DBHandler(this,"todoApplication.db",1,"mainTable")
 
         val addBtn = findViewById<Button>(R.id.addBtn)
         val moveBtn = findViewById<Button>(R.id.moveBtn)
@@ -92,44 +92,7 @@ class MainActivity : AppCompatActivity(), ItemStartDragListener {
         }
 
         //DB에서 데이터 읽어와서 보여주기
-        GlobalScope.launch(Dispatchers.IO){
-            var dbReader = dbHelper.readableDatabase
-            //var todoItems : ArrayList<TodoItem> = ArrayList<TodoItem>()
-            // Filter results WHERE "title" = 'My Title'
-            val selection = null
-            val selectionArgs = null
-
-            // How you want the results sorted in the resulting Cursor
-            val sortOrder = "id ASC"
-            val projection = arrayOf(todoEntity.COLUMN_ID, todoEntity.COLUMN_TITLE, todoEntity.COLUMN_CONTENT, todoEntity.COLUMN_COMPLETE, todoEntity.COLUMN_DUETIME)
-            val cursor = dbReader.query(
-                "todo",   // The table to query
-                projection,             // The array of columns to return (pass null to get all)
-                selection,              // The columns for the WHERE clause
-                selectionArgs,          // The values for the WHERE clause
-                null,                   // don't group the rows
-                null,                   // don't filter by row groups
-                sortOrder               // The sort order
-            )
-
-            with(cursor) {
-                while (moveToNext()) {
-                    var todoItem : TodoItem
-                    var id = getLong(0).toInt()
-                    var title = getString(1)
-                    var content = getString(2)
-                    var complete = getLong(3).toInt()
-                    var dueTime = SimpleDateFormat("YYYY-MM-dd HH:mm").parse(getString(4))
-
-                    todoItem = TodoItem(id,title,content,complete  ,dueTime)
-                    todoList.add(todoItem)
-                }
-            }
-            cursor.close()
-
-            todoAdapter.notifyDataSetChanged()
-        }
-
+        dbHandler.getAllData(todoList,todoAdapter)
 
     }
 
@@ -182,4 +145,12 @@ class MainActivity : AppCompatActivity(), ItemStartDragListener {
 
     }
 
+    override fun onStop() {
+        Log.d("TEST", "onStop called")
+        //DB table 변경된 내용 추가
+        //일단 mainTable만 초기화 - 이후에 여러 테이블 이름 다 받아와서 초기화
+        dbHandler.insertValuesWithReplace(todoList)
+        dbHandler.close()
+        super.onStop()
+    }
 }
