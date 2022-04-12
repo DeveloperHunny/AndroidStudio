@@ -141,6 +141,36 @@ class DBHandler(val context: Context, val dbName: String, val dbVersion: Int, va
 
     }
 
+    fun getAllData(dirList : ArrayList<String>, dirAdapter: DirAdapter): Boolean{
+        Log.d("TEST", "getAllData called")
+        val db = this.readableDatabase
+
+        val projection = arrayOf("dirName")
+        val selection = null
+        val selectionArgs = null
+
+        val cursor = db.query(
+            tableName,
+            projection,
+            selection,
+            selectionArgs,
+            null,
+            null,
+            null
+        )
+
+        dirList.clear() // List 초기화
+        with(cursor){
+            while(moveToNext()){
+                var dirName = cursor.getString(0)
+                dirList.add(dirName)
+            }
+
+        }
+        dirAdapter.notifyDataSetChanged()
+        return true
+    }
+
     /*fun deleteData(user: User): Int{
         var db = this.writableDatabase
 

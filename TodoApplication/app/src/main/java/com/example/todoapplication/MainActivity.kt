@@ -83,7 +83,8 @@ class MainActivity : AppCompatActivity(), ItemStartDragListener {
 
         //MoveBtn 클릭 이벤트 설정
         moveBtn.setOnClickListener{
-            TODO("MOVE BTN FUNCTION SET")
+            val dirDialog = dirDialogClass(this)
+            dirDialog.showDialog()
         }
 
         //configBtn 클릭 이벤트 설정
